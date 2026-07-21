@@ -15,6 +15,13 @@ import (
 var (
 	modntdll          = windows.NewLazySystemDLL("ntdll.dll")
 	procNtQueryObject = modntdll.NewProc("NtQueryObject")
+
+	// Version metadata populated during builds (using -ldflags)
+	version   = "dev"
+	gitCommit = "unknown"
+	buildDate = "unknown"
+	goVersion = "unknown"
+	updateURL = ""
 )
 
 const (
@@ -40,6 +47,19 @@ type SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX struct {
 }
 
 func main() {
+	// Check for version flag
+	if len(os.Args) > 1 && (os.Args[1] == "-version" || os.Args[1] == "--version" || os.Args[1] == "-v") {
+		fmt.Printf("SC2 Multibox Closer\n")
+		fmt.Printf("Version:    %s\n", version)
+		fmt.Printf("Git Commit: %s\n", gitCommit)
+		fmt.Printf("Build Date: %s\n", buildDate)
+		fmt.Printf("Go Version: %s\n", goVersion)
+		if updateURL != "" {
+			fmt.Printf("Update URL: %s\n", updateURL)
+		}
+		return
+	}
+
 	// 1. Elevate if not running as administrator
 	if !amIAdmin() {
 		fmt.Println("Not running as admin. Re-executing with elevated privileges...")
